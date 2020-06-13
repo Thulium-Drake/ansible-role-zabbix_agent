@@ -31,6 +31,12 @@
   notify: 'restart zabbix-agent'
   no_log: true
 
+- name: 'Ensure service enabled'
+  service:
+    name: 'zabbix-agent'
+    enabled: true
+    state: 'started'
+
 - name: 'Ensure agent configuration directory'
   file:
     path: '/etc/zabbix/zabbix_agentd.conf.d'
