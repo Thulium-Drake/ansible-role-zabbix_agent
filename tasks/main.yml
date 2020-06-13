@@ -18,7 +18,7 @@
 
 - name: 'Ensure agent key'
   copy:
-    content: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed ) | hash('sha512') }}"
+    content: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed | string ) | hash('sha512') }}"
     dest: '/etc/zabbix/zabbix_agentd.key'
     mode: 0600
     owner: 'zabbix'
@@ -32,6 +32,12 @@
     state: 'directory'
     owner: 'root'
     group: 'root'
+
+- name: 'Merge zabbix_templates list'
+  merge_vars:
+    suffix_to_merge: '_zabbix_templates__to_merge'
+    merged_var_name: 'zabbix_templates'
+    expected_type: 'list'
 
 - name: 'Deploy extra files for templates'
   block:

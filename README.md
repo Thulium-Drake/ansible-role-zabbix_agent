@@ -15,4 +15,7 @@ If you have your own collection of Zabbix templates, you can still use this role
 you place your template scripts and configs in a similar structure.
 
 ## Setup
+This role uses Ansible Merge Vars to create lists of templates that will be
+applied to the hosts managed.
+
 Incorporate the role in your regular Ansible playbooks and configure it.
