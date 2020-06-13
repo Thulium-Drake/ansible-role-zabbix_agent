@@ -79,6 +79,7 @@
       package:
         name: "{{ template.packages }}"
         state: 'present'
+      when: template.packages is defined
       loop: "{{ zabbix_templates }}"
       loop_control:
         loop_var: 'template'
