@@ -1,0 +1,24 @@
+---
+# The task below can be used to import templates into Zabbix
+# However I have noticed that the module is not always able
+# to import (zabbix-exported) files.
+#
+# Should that ever get fixed, it would be possible for this
+# role to automatically import the required templates into
+# Zabbix
+- name: 'Ensure template in Zabbix'
+  zabbix_template:
+    server_url: "{{ zabbix_server_url }}"
+    validate_certs: "{{ zabbix_server_validate }}"
+    http_login_user: "{{ zabbix_server_username }}"
+    http_login_password: "{{ zabbix_server_password }}"
+    login_user: "{{ zabbix_server_username }}"
+    login_password: "{{ zabbix_server_password }}"
+    template_groups: 'Templates'
+    state: 'present'
+    template_xml: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/template-{{ template.filename }}.xml"
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  when: zabbix_server_auto_import
+  delegate_to: 'localhost'

@@ -1,5 +1,14 @@
 ---
 ###
+# General server configuration
+###
+zabbix_server_username: 'zabbix-cli'                        # Username for Ansible to use on the Zabbix server
+zabbix_server_password: 'supersecretpassword'               # Password for the user
+zabbix_server_url: 'https://monitoring.example.com'         # URL where the Zabbix server is
+zabbix_server_validate: true                                # Validate the server's SSL certificate
+zabbix_server_agent_force: true                             # Overwrite any existing configuration when
+                                                            # registering agents
+###
 # General Agent configuration
 ###
 zabbix_server_addresses: '127.0.0.1'                  # Comma separated list of all Zabbix server addresses
@@ -10,18 +19,25 @@ zabbix_template_script_path: '/opt/zabbix/templates'  # Path where template scri
                                                       # https://github.com/Thulium-Drake/zabbix-templates
 zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template configuration is stored in the
                                                       # following manner: template_name/host_fqdn.conf
-
 ###
 # Host specific configuration
 ###
+#
+# This list can contain 3 types of entries
+# * A template that has no files, but has to be linked to a host (first example)
+# * A supporting template that has files, but does not need to be linked to a host (second example)
+# * A template that has files and has to be linked to a host (third example)
 zabbix_templates:                                     # List of templates to be deployed on a specific host
+  - zabbix_name: 'Template OS Linux'                  # Template name in Zabbix
   - filename: 'diskstats'                             # Name of the template on disk
-    zabbix_name: 'Template Disk devices'              # Name of the template in Zabbix
     conf_required: false                              # If there is a host-specific config to be deployed
-    cron_required: false
+    cron_required: true                               # If there is a cronjob required to gather data
   - filename: 'urlcheck'
-    zabbix_name: 'Template URL Monitoring'
+    zabbix_name: 'Template URL monitoring'
     conf_required: true
     cron_required: true                               # If the template uses a script to gather data
     cron_special_time: 'hourly'                       # Special time when to run the script, if not every minute
     cron_user: 'zabbix'                               # Which user runs the cronjob, if not zabbix
+
+zabbix_host_groups:                                   # List of host groups the system should be a member of
+  - 'Linux servers'
