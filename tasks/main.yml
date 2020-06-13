@@ -39,7 +39,7 @@
 
 - name: 'Ensure agent configuration directory'
   file:
-    path: '/etc/zabbix/zabbix_agentd.conf.d'
+    path: '/etc/zabbix/zabbix_agentd.d'
     state: 'directory'
     owner: 'root'
     group: 'root'
@@ -66,7 +66,7 @@
     - name: 'Deploy agent configuration for templates'
       copy:
         src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_agent-{{ template.filename }}.conf"
-        dest: "/etc/zabbix/zabbix_agentd.conf.d/zabbix_agent-{{ template.filename }}.conf"
+        dest: "/etc/zabbix/zabbix_agentd.d/zabbix_agent-{{ template.filename }}.conf"
         mode: 0664
         owner: 'root'
         group: 'root'
