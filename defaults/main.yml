@@ -19,6 +19,10 @@ zabbix_template_script_path: '/opt/zabbix/templates'  # Path where template scri
                                                       # https://github.com/Thulium-Drake/zabbix-templates
 zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template configuration is stored in the
                                                       # following manner: template_name/host_fqdn.conf
+zabbix_agent_description: |
+  Some settings managed by Ansible, changed to these can be lost!
+  
+  Changes to macro's are kept.
 ###
 # Host specific configuration
 ###

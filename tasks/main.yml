@@ -136,6 +136,7 @@
     login_user: "{{ zabbix_server_username }}"
     login_password: "{{ zabbix_server_password }}"
     host_name: "{{ ansible_facts['fqdn'] }}"
+    description: "{{ zabbix_agent_description }}"
     host_groups: "{{ zabbix_host_groups }}"
     tls_connect: 2
     tls_accept: 2
