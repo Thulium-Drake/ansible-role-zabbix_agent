@@ -1,0 +1,27 @@
+---
+###
+# General Agent configuration
+###
+zabbix_server_addresses: '127.0.0.1'                  # Comma separated list of all Zabbix server addresses
+zabbix_agent_key_seed: 'random stuff'                 # Seed used to generate encryption keys for Zabbix agents
+zabbix_template_script_path: '/opt/zabbix/templates'  # Path where template scripts are stored on the Ansible
+                                                      # controller
+                                                      # This has been made compatible with a structure as in
+                                                      # https://github.com/Thulium-Drake/zabbix-templates
+zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template configuration is stored in the
+                                                      # following manner: template_name/host_fqdn.conf
+
+###
+# Host specific configuration
+###
+zabbix_templates:                                     # List of templates to be deployed on a specific host
+  - filename: 'diskstats'                             # Name of the template on disk
+    zabbix_name: 'Template Disk devices'              # Name of the template in Zabbix
+    conf_required: false                              # If there is a host-specific config to be deployed
+    cron_required: false
+  - filename: 'urlcheck'
+    zabbix_name: 'Template URL Monitoring'
+    conf_required: true
+    cron_required: true                               # If the template uses a script to gather data
+    cron_special_time: 'hourly'                       # Special time when to run the script, if not every minute
+    cron_user: 'zabbix'                               # Which user runs the cronjob, if not zabbix

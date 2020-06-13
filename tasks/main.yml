@@ -1,0 +1,81 @@
+---
+- name: 'Install packages'
+  package:
+    name:
+      - 'zabbix-agent'
+      - 'zabbix-sender'
+      - 'cron'
+    state: 'present'
+
+- name: 'Ensure agent base config'
+  template:
+    src: 'zabbix_agentd.conf.j2'
+    dest: '/etc/zabbix/zabbix_agentd.conf'
+    mode: 0644
+    owner: 'root'
+    group: 'root'
+  notify: 'restart zabbix-agent'
+
+- name: 'Ensure agent key'
+  copy:
+    content: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed ) | hash('sha512') }}"
+    dest: '/etc/zabbix/zabbix_agentd.key'
+    mode: 0600
+    owner: 'zabbix'
+    group: 'zabbix'
+  notify: 'restart zabbix-agent'
+  no_log: true
+
+- name: 'Ensure agent configuration directory'
+  file:
+    path: '/etc/zabbix/zabbix_agentd.conf.d'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+
+- name: 'Deploy supporting script for templates'
+  copy:
+    src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_{{ template.filename }}"
+    dest: "/usr/local/bin/zabbix_{{ template.filename }}"
+    mode: 0775
+    owner: 'root'
+    group: 'root'
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+
+- name: 'Deploy agent configuration for templates'
+  copy:
+    src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_agent-{{ template.filename }}.conf"
+    dest: "/etc/zabbix/zabbix_agentd.conf.d/zabbix_agent-{{ template.filename }}.conf"
+    mode: 0664
+    owner: 'root'
+    group: 'root'
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart zabbix-agent'
+
+- name: 'Deploy host agent configuration for templates'
+  copy:
+    src: "{{ zabbix_template_config_path }}/zabbix-{{ template.filename }}/{{ ansible_facts['fqdn'] }}.conf"
+    dest: "/etc/zabbix/zabbix-{{ template.filename }}.conf"
+    mode: 0664
+    owner: 'root'
+    group: 'root'
+  when: template.conf_required
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart zabbix-agent'
+
+- name: 'Ensure cronjobs for templates'
+  cron:
+    name: "{{ template.filename }} getdata"
+    job: "/usr/local/bin/zabbix_{{ template.filename }} getdata"
+    special_time: "{{ template.cron_special_time | default(omit) }}"
+    user: "{{ template.cron_user | default('zabbix') }}"
+  when: template.cron_required
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
