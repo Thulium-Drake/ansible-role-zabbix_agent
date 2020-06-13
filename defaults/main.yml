@@ -27,6 +27,7 @@ zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template conf
 # * A template that has no files, but has to be linked to a host (first example)
 # * A supporting template that has files, but does not need to be linked to a host (second example)
 # * A template that has files and has to be linked to a host (third example)
+# * A template that also requires some extra software to be installed (fourth example)
 #
 # The list is created using ansible-merge-vars
 #
@@ -41,6 +42,14 @@ zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template conf
 #    cron_required: true                               # If the template uses a script to gather data
 #    cron_special_time: 'hourly'                       # Special time when to run the script, if not every minute
 #    cron_user: 'zabbix'                               # Which user runs the cronjob, if not zabbix
+#  - filename: 'pve'
+#    zabbix_name: 'Template OS PVE'
+#    conf_required: true
+#    cron_required: true
+#    packages:                                         # List of packages that have be present for the template
+#      - 'gawk'                                        # to function properly
+#      - 'jo'
+#      - 'jq'
 
 zabbix_host_groups:                                   # List of host groups the system should be a member of
   - 'Linux servers'

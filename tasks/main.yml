@@ -75,7 +75,15 @@
         loop_var: 'template'
       notify: 'restart zabbix-agent'
 
-    - name: 'Deploy host agent configuration for templates'
+    - name: 'Ensure packages for template'
+      package:
+        name: "{{ template.packages }}"
+        state: 'present'
+      loop: "{{ zabbix_templates }}"
+      loop_control:
+        loop_var: 'template'
+
+    - name: 'Deploy host agent configuration files for templates'
       copy:
         src: "{{ zabbix_template_config_path }}/zabbix-{{ template.filename }}/{{ ansible_facts['fqdn'] }}.conf"
         dest: "/etc/zabbix/zabbix-{{ template.filename }}.conf"
