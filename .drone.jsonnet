@@ -1,21 +1,3 @@
-local Converge(distro) = {
-  name: "Converge - "+distro,
-  image: "registry.element-networks.nl/tools/molecule",
-  commands: [
-    "molecule destroy",
-    "molecule converge",
-    "molecule idempotence",
-    "molecule verify",
-    "molecule destroy",
-  ],
-  environment:
-    { MOLECULE_DISTRO: +distro, },
-  privileged: true,
-  volumes: [
-    { name: "docker", path: "/var/run/docker.sock" },
-  ],
-};
-
 [
   {
     name: "Lint",
@@ -41,24 +23,6 @@ local Converge(distro) = {
     ],
   },
   {
-    kind: "pipeline",
-    name: "Test",
-    steps: [
-      Converge("debian10"),
-      Converge("ubuntu1804"),
-      Converge("centos7"),
-    ],
-    volumes: [
-      { name: "docker",
-        host: { path: "/var/run/docker.sock" }
-      },
-    ],
-
-    depends_on: [
-      "Lint",
-    ],
-  },
-  {
     name: "Publish",
     kind: "pipeline",
     clone:
@@ -76,7 +40,7 @@ local Converge(distro) = {
       },
     ],
     depends_on: [
-      "Test",
+      "Lint",
     ],
   },
 ]
