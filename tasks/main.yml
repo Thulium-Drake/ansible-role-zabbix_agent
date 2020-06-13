@@ -90,8 +90,25 @@
         mode: 0664
         owner: 'root'
         group: 'root'
-      when: template.conf_required
+      when:
+        - template.conf_required
+        - template.conf_files is not defined
       loop: "{{ zabbix_templates }}"
+      loop_control:
+        loop_var: 'template'
+      notify: 'restart zabbix-agent'
+
+    - name: 'Deploy host agent configuration files for templates'
+      copy:
+        src: "{{ zabbix_template_config_path }}/zabbix-{{ template.0.filename }}/{{ ansible_facts['fqdn'] }}-{{ template.1 }}"
+        dest: "/etc/zabbix/zabbix-{{ template.filename }}.conf"
+        mode: 0664
+        owner: 'root'
+        group: 'root'
+      when:
+        - template.conf_required
+        - template.conf_files is defined
+      loop: "{{ zabbix_templates | subelements('packages') }}"
       loop_control:
         loop_var: 'template'
       notify: 'restart zabbix-agent'

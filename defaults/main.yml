@@ -25,9 +25,9 @@ zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template conf
 #
 # This list can contain 3 types of entries
 # * A template that has no files, but has to be linked to a host (first example)
-# * A supporting template that has files, but does not need to be linked to a host (second example)
+# * A supporting template that has a single file, but does not need to be linked to a host (second example)
 # * A template that has files and has to be linked to a host (third example)
-# * A template that also requires some extra software to be installed (fourth example)
+# * A template that also requires some extra software to be installed, and multiple files (fourth example)
 #
 # The list is created using ansible-merge-vars
 #
@@ -45,6 +45,9 @@ zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template conf
 #  - filename: 'pve'
 #    zabbix_name: 'Template OS PVE'
 #    conf_required: true
+#    conf_files:
+#      - 'pve.conf'
+#      - 'ctpid.conf'
 #    cron_required: true
 #    packages:                                         # List of packages that have be present for the template
 #      - 'gawk'                                        # to function properly
