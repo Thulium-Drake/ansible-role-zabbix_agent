@@ -101,7 +101,7 @@
     host_groups: "{{ zabbix_host_groups }}"
     tls_connect: 2
     tls_accept: 2
-    tls_psk: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed ) | hash('sha512') }}"
+    tls_psk: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed | string ) | hash('sha512') }}"
     tls_psk_identity: "{{ ansible_facts['fqdn'] }}"
     interfaces:
       - type: 'agent'
