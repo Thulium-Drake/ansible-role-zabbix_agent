@@ -1,3 +1,5 @@
+[![Build Status](https://drone.element-networks.nl/api/badges/Element-Networks/ansible-role_zabbix-agent/status.svg)](https://drone.element-networks.nl/Element-Networks/ansible-role_zabbix-agent)
+
 # Zabbix agent as configured by Ansible
 This role can configure an Zabbix agent on your Ansible managed hosts.
 
