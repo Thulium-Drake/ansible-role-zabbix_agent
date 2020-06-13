@@ -109,7 +109,7 @@
       when:
         - template.conf_required
         - template.conf_files is defined
-      loop: "{{ zabbix_templates | subelements('packages') }}"
+      loop: "{{ zabbix_templates | subelements('conf_files') }}"
       loop_control:
         loop_var: 'template'
       notify: 'restart zabbix-agent'
