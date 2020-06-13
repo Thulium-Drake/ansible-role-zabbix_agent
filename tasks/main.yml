@@ -50,81 +50,82 @@
     merged_var_name: 'zabbix_templates'
     expected_type: 'list'
 
-- name: 'Deploy extra files for templates'
-  block:
-    - name: 'Deploy supporting script for templates'
-      copy:
-        src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_{{ template.filename }}"
-        dest: "/usr/local/bin/zabbix_{{ template.filename }}"
-        mode: 0775
-        owner: 'root'
-        group: 'root'
-      loop: "{{ zabbix_templates }}"
-      loop_control:
-        loop_var: 'template'
-
-    - name: 'Deploy agent configuration for templates'
-      copy:
-        src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_agent-{{ template.filename }}.conf"
-        dest: "/etc/zabbix/zabbix_agentd.d/zabbix_agent-{{ template.filename }}.conf"
-        mode: 0664
-        owner: 'root'
-        group: 'root'
-      loop: "{{ zabbix_templates }}"
-      loop_control:
-        loop_var: 'template'
-      notify: 'restart zabbix-agent'
-
-    - name: 'Ensure packages for template'
-      package:
-        name: "{{ template.packages }}"
-        state: 'present'
-      when: template.packages is defined
-      loop: "{{ zabbix_templates }}"
-      loop_control:
-        loop_var: 'template'
-
-    - name: 'Deploy host agent configuration files for templates'
-      copy:
-        src: "{{ zabbix_template_config_path }}/zabbix-{{ template.filename }}/{{ ansible_facts['fqdn'] }}.conf"
-        dest: "/etc/zabbix/zabbix-{{ template.filename }}.conf"
-        mode: 0664
-        owner: 'root'
-        group: 'root'
-      when:
-        - template.conf_required
-        - template.conf_files is not defined
-      loop: "{{ zabbix_templates }}"
-      loop_control:
-        loop_var: 'template'
-      notify: 'restart zabbix-agent'
-
-    - name: 'Deploy host agent configuration files for templates'
-      copy:
-        src: "{{ zabbix_template_config_path }}/zabbix-{{ template.0.filename }}/{{ ansible_facts['fqdn'] }}-{{ template.1 }}"
-        dest: "/etc/zabbix/zabbix-{{ template.filename }}.conf"
-        mode: 0664
-        owner: 'root'
-        group: 'root'
-      when:
-        - template.conf_required
-        - template.conf_files is defined
-      loop: "{{ zabbix_templates | subelements('conf_files') }}"
-      loop_control:
-        loop_var: 'template'
-      notify: 'restart zabbix-agent'
-
-    - name: 'Ensure cronjobs for templates'
-      cron:
-        name: "{{ template.filename }} getdata"
-        job: "/usr/local/bin/zabbix_{{ template.filename }} getdata"
-        special_time: "{{ template.cron_special_time | default(omit) }}"
-        user: "{{ template.cron_user | default('zabbix') }}"
-      when: template.cron_required
-      loop: "{{ zabbix_templates }}"
-      loop_control:
-        loop_var: 'template'
+- name: 'Deploy supporting script for templates'
+  copy:
+    src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_{{ template.filename }}"
+    dest: "/usr/local/bin/zabbix_{{ template.filename }}"
+    mode: 0775
+    owner: 'root'
+    group: 'root'
   when: template.filename is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+
+- name: 'Deploy agent configuration for templates'
+  copy:
+    src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_agent-{{ template.filename }}.conf"
+    dest: "/etc/zabbix/zabbix_agentd.d/zabbix_agent-{{ template.filename }}.conf"
+    mode: 0664
+    owner: 'root'
+    group: 'root'
+  when: template.filename is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart zabbix-agent'
+
+- name: 'Ensure packages for template'
+  package:
+    name: "{{ template.packages }}"
+    state: 'present'
+  when: template.packages is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+
+- name: 'Deploy host agent configuration file for templates'
+  copy:
+    src: "{{ zabbix_template_config_path }}/zabbix-{{ template.filename }}/{{ ansible_facts['fqdn'] }}.conf"
+    dest: "/etc/zabbix/zabbix-{{ template.filename }}.conf"
+    mode: 0664
+    owner: 'root'
+    group: 'root'
+  when:
+    - template.conf_required is defined
+    - template.conf_required
+    - template.filename is defined
+    - template.conf_files is not defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart zabbix-agent'
+
+- name: 'Deploy host agent configuration files for templates'
+  copy:
+    src: "{{ zabbix_template_config_path }}/zabbix-{{ template.0.filename }}/{{ ansible_facts['fqdn'] }}-{{ template.1 }}"
+    dest: "/etc/zabbix/zabbix-{{ template.1 }}"
+    mode: 0664
+    owner: 'root'
+    group: 'root'
+  loop: "{{ zabbix_templates | subelements('conf_files', { 'skip_missing': true } ) }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart zabbix-agent'
+
+- name: 'Ensure cronjobs for templates'
+  cron:
+    name: "{{ template.filename }} getdata"
+    job: "/usr/local/bin/zabbix_{{ template.filename }} getdata"
+    special_time: "{{ template.cron_special_time | default(omit) }}"
+    user: "{{ template.cron_user | default('zabbix') }}"
+  when:
+    - template.cron_required is defined
+    - template.cron_required
+    - template.filename is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
 
 - name: 'Ensure host in Zabbix'
   zabbix_host:
