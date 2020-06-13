@@ -10,6 +10,7 @@
 - name: 'Install python dependencies on Ansible controller'
   pip:
     name: 'zabbix-api'
+  delegate_to: 'localhost'
 
 - name: 'Ensure agent base config'
   template:
