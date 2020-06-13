@@ -7,6 +7,10 @@
       - 'cron'
     state: 'present'
 
+- name: 'Install python dependencies on Ansible controller'
+  pip:
+    name: 'zabbix-api'
+
 - name: 'Ensure agent base config'
   template:
     src: 'zabbix_agentd.conf.j2'
