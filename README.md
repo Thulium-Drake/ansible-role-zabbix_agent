@@ -24,3 +24,26 @@ Windows collection requirements:
   * ansible.windows
   * community.windows
 Incorporate the role in your regular Ansible playbooks and configure it.
+
+## Windows Setup
+When installing Zabbix on Windows targets, please note that this role assumes the msi package is
+present on the Ansible Controller. Please set the variable for which version you wish to install
+(default is 5.0.4). Then place the MSI package at:
+
+```
+<playbooks directory>/zabbix_agent-5.0.4-windows-amd64-openssl.msi
+```
+
+Then run this role against your clients with the following play (add variables
+required to connect to the Windows host via WinRM or SSH):
+
+```
+---
+- name: 'Setup Zabbix agent on Windows'
+  hosts: 'win_clients'
+  tasks:
+    - name: 'Run role'
+      import_role:
+        name: 'zabbix_agent'
+        tasks_from: 'win_main.yml'
+```
