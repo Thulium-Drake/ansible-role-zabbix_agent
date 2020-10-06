@@ -13,6 +13,17 @@ zabbix_server_agent_force: true                             # Overwrite any exis
 ###
 zabbix_server_addresses: '127.0.0.1'                  # Comma separated list of all Zabbix server addresses
 zabbix_agent_key_seed: 'random stuff'                 # Seed used to generate encryption keys for Zabbix agents
+
+###
+# Windows Agent configuration
+###
+zabbix_win_agent_version: '5.0.4'     # Which version of Zabbix to install (provide installer in <playbookdir>/files)
+zabbix_ansible_linux_user: 'root'     # User under which Ansible runs on the Ansible Control node to register the
+                                      # Windows host with Zabbix
+                                      #
+###
+# Monitoring Template configuration
+###
 zabbix_template_script_path: '/opt/zabbix/templates'  # Path where template scripts are stored on the Ansible
                                                       # controller
                                                       # This has been made compatible with a structure as in
@@ -23,6 +34,7 @@ zabbix_agent_description: |
   Some settings managed by Ansible, changed to these can be lost!
   
   Changes to macro's are kept.
+
 ###
 # Host specific configuration
 ###
@@ -57,6 +69,15 @@ zabbix_agent_description: |
 #      - 'gawk'                                        # to function properly
 #      - 'jo'
 #      - 'jq'
-
+#
+# Windows based templates Scheduled tasks use community.windows.win_scheduled_task's triggers
+#
+#  - zabbix_name: 'Template OS Windows'                  # Template name in Zabbix
+#      filename: windows
+#      schedtasks_required: true
+#      schedtasks_triggers:
+#        - type: 'daily'
+#
+zabbix_templates: []                                  # Do not attach templates by default
 zabbix_host_groups:                                   # List of host groups the system should be a member of
   - 'Linux servers'

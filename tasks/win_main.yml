@@ -1,0 +1,145 @@
+---
+- name: 'Ensure Temp folder'
+  ansible.windows.win_file:
+    path: 'C:\Temp'
+    state: 'directory'
+
+- name: 'Copy installer to target'
+  ansible.windows.win_copy:
+    src: "zabbix_agent-{{ zabbix_win_agent_version }}-windows-amd64-openssl.msi"
+    dest: 'C:\Temp\zabbix_installer.msi'
+
+- name: 'Ensure MSI package installed'
+  ansible.windows.win_package:
+    path: 'C:\Temp\zabbix_installer.msi'
+    state: 'present'
+    arguments:
+      - "SERVER={{ zabbix_server_addresses }}"
+      - 'ENABLEPATH=1'
+      - 'ENABLEREMOTECOMMANDS=1'
+
+- name: 'Ensure agent base config'
+  template:
+    src: 'zabbix_agentd.conf.j2'
+    dest: 'C:\Program Files\Zabbix Agent/zabbix_agentd.conf'
+    mode: 0644
+    owner: 'root'
+    group: 'root'
+  notify: 'restart win zabbix-agent'
+
+- name: 'Ensure agent key'
+  copy:
+    content: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed | string ) | hash('sha512') }}"
+    dest: 'C:\Program Files\Zabbix Agent/zabbix_agentd.key'
+    mode: 0600
+    owner: 'zabbix'
+    group: 'zabbix'
+  notify: 'restart win zabbix-agent'
+  no_log: true
+
+- name: 'Ensure service enabled'
+  ansible.windows.win_service:
+    name: 'Zabbix Agent'
+    start_mode: 'auto'
+    state: 'started'
+
+- name: 'Ensure default agent configuration directory absent'
+  ansible.windows.win_file:
+    path: 'C:\Program Files\Zabbix Agent/zabbix_agentd.d'
+    state: 'absent'
+
+- name: 'Ensure agent configuration directories'
+  ansible.windows.win_file:
+    path: "{{ conf_dir }}"
+    state: 'directory'
+  loop:
+    - 'C:\Program Files\Zabbix Agent/zabbix_agentd.d'
+    - 'C:\Program Files\Zabbix Agent/Scripts'
+  loop_control:
+    loop_var: 'conf_dir'
+
+- name: 'Deploy supporting script for templates'
+  ansible.windows.win_copy:
+    src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_{{ template.filename }}"
+    dest: 'C:\Program Files\Zabbix Agent\Scripts\zabbix_{{ template.filename }}'
+  when: template.filename is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+
+- name: 'Deploy agent configuration for templates'
+  ansible.windows.win_copy:
+    src: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/zabbix_agent-{{ template.filename }}.conf"
+    dest: 'C:\Program Files\Zabbix Agent\zabbix_agentd.d\zabbix_agent-{{ template.filename }}.conf'
+  when: template.filename is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart win zabbix-agent'
+
+- name: 'Deploy host agent configuration file for templates'
+  ansible.windows.win_copy:
+    src: "{{ zabbix_template_config_path }}/zabbix-{{ template.filename }}/{{ ansible_facts['fqdn'] }}.conf"
+    dest: 'C:\Program Files\Zabbix Agent\zabbix-{{ template.filename }}.conf'
+  when:
+    - template.conf_required is defined
+    - template.conf_required
+    - template.filename is defined
+    - template.conf_files is not defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart win zabbix-agent'
+
+- name: 'Deploy host agent configuration files for templates'
+  ansible.windows.win_copy:
+    src: "{{ zabbix_template_config_path }}/zabbix-{{ template.0.filename }}/{{ ansible_facts['fqdn'] }}-{{ template.1 }}"
+    dest: 'C:\Program Files\Zabbix Agent\zabbix-{{ template.1 }}'
+  loop: "{{ zabbix_templates | subelements('conf_files', { 'skip_missing': true } ) }}"
+  loop_control:
+    loop_var: 'template'
+  notify: 'restart win zabbix-agent'
+
+- name: 'Ensure Scheduled Tasks for templates'
+  community.windows.win_scheduled_task:
+    name: "{{ template.filename }} getdata"
+    actions:
+      - path: 'C:\Program Files\Zabbix Agent\Scripts\zabbix_{{ template.filename }}'
+        arguments: 'getdata'
+    triggers: "{{ template.schedtask_triggers | default([]) }}"
+    user: "{{ template.schedtask_user | default('SYSTEM') }}"
+  when:
+    - template.schedtasks_required is defined
+    - template.schedtasks_required
+    - template.filename is defined
+  loop: "{{ zabbix_templates }}"
+  loop_control:
+    loop_var: 'template'
+
+- name: 'Ensure host in Zabbix'
+  community.zabbix.zabbix_host:
+    server_url: "{{ zabbix_server_url }}"
+    validate_certs: "{{ zabbix_server_validate }}"
+    http_login_user: "{{ zabbix_server_username }}"
+    http_login_password: "{{ zabbix_server_password }}"
+    login_user: "{{ zabbix_server_username }}"
+    login_password: "{{ zabbix_server_password }}"
+    host_name: "{{ ansible_facts['fqdn'] }}"
+    description: "{{ zabbix_agent_description }}"
+    host_groups: "{{ zabbix_host_groups }}"
+    tls_connect: 2
+    tls_accept: 2
+    tls_psk: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed | string ) | hash('sha512') }}"
+    tls_psk_identity: "{{ ansible_facts['fqdn'] }}"
+    interfaces:
+      - type: 'agent'
+        main: 1
+        dns: "{{ ansible_facts['fqdn'] }}"
+        ip: "{{ ansible_facts['ip_addresses'][0] }}"
+        useip: 1
+    link_templates: "{{ zabbix_templates | json_query('[*].zabbix_name') }}"
+    force: "{{ zabbix_server_agent_force }}"
+  delegate_to: 'localhost'
+  vars:
+    ansible_user: "{{ zabbix_ansible_linux_user }}"
+    ansible_shell_type: 'sh'

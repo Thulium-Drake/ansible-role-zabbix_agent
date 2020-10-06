@@ -3,3 +3,8 @@
   service:
     name: 'zabbix-agent'
     state: 'restarted'
+
+- name: 'restart win zabbix-agent'
+  ansible.windows.win_service:
+    name: 'Zabbix Agent'
+    state: 'restarted'

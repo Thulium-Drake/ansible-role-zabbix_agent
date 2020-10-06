@@ -20,4 +20,7 @@ Plugin requirements:
 Collection requirements:
   * community.crypto
   * community.zabbix
+Windows collection requirements:
+  * ansible.windows
+  * community.windows
 Incorporate the role in your regular Ansible playbooks and configure it.
