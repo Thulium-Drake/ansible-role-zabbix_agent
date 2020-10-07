@@ -45,7 +45,7 @@
 
 - name: 'Ensure default agent configuration directory absent'
   ansible.windows.win_file:
-    path: 'C:\Program Files\Zabbix Agent/zabbix_agentd.d'
+    path: 'C:\Program Files\Zabbix Agent/zabbix_agentd.conf.d'
     state: 'absent'
 
 - name: 'Ensure agent configuration directories'
