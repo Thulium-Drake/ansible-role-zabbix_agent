@@ -19,7 +19,7 @@
       - 'ENABLEREMOTECOMMANDS=1'
 
 - name: 'Ensure agent base config'
-  template:
+  ansible.windows.win_template:
     src: 'zabbix_agentd.conf.j2'
     dest: 'C:\Program Files\Zabbix Agent/zabbix_agentd.conf'
     mode: 0644
@@ -28,7 +28,7 @@
   notify: 'restart win zabbix-agent'
 
 - name: 'Ensure agent key'
-  copy:
+  ansible.windows.win_copy:
     content: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed | string ) | hash('sha512') }}"
     dest: 'C:\Program Files\Zabbix Agent/zabbix_agentd.key'
     mode: 0600
