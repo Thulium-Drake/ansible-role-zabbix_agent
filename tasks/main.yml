@@ -117,6 +117,11 @@
   cron:
     name: "{{ template.filename }} getdata"
     job: "/usr/local/bin/zabbix_{{ template.filename }} getdata"
+    minute: "{{ template.cron_minute | default(omit) }}"
+    hour: "{{ template.cron_hour | default(omit) }}"
+    day: "{{ template.cron_day | default(omit) }}"
+    weekday: "{{ template.cron_weekday | default(omit) }}"
+    month: "{{ template.cron_month | default(omit) }}"
     special_time: "{{ template.cron_special_time | default(omit) }}"
     user: "{{ template.cron_user | default('zabbix') }}"
   when:

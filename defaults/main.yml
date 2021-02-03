@@ -56,7 +56,7 @@ zabbix_agent_description: |
 #    zabbix_name: 'Template URL monitoring'
 #    conf_required: true
 #    cron_required: true                               # If the template uses a script to gather data
-#    cron_special_time: 'hourly'                       # Special time when to run the script, if not every minute
+#    cron_special_time: 'hourly'                       # supports special_time, minute, hour, day, weekday, month
 #    cron_user: 'zabbix'                               # Which user runs the cronjob, if not zabbix
 #  - filename: 'pve'
 #    zabbix_name: 'Template OS PVE'
