@@ -16,7 +16,7 @@
     login_password: "{{ zabbix_server_password }}"
     template_groups: 'Templates'
     state: 'present'
-    template_xml: "{{ zabbix_template_script_path }}/zabbix-{{ template.filename }}/template-{{ template.filename }}.xml"
+    template_xml: "{{ zabbix_template_script_path }}/zabbix-{{ template['filename'] }}/template-{{ template['filename'] }}.xml"
   loop: "{{ zabbix_templates }}"
   loop_control:
     loop_var: 'template'
