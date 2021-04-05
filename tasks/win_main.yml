@@ -21,7 +21,7 @@
 - name: 'Ensure agent base config'
   ansible.windows.win_template:
     src: 'zabbix_agentd.conf.j2'
-    dest: 'C:\Program Files\Zabbix Agent/zabbix_agentd.conf'
+    dest: "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.conf"
     mode: 0644
     owner: 'root'
     group: 'root'
@@ -30,7 +30,7 @@
 - name: 'Ensure agent key'
   ansible.windows.win_copy:
     content: "{{ (ansible_facts['fqdn'] + zabbix_agent_key_seed | string ) | hash('sha512') }}"
-    dest: 'C:\Program Files\Zabbix Agent/zabbix_agentd.key'
+    dest: "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.key"
     mode: 0600
     owner: 'zabbix'
     group: 'zabbix'
@@ -45,7 +45,7 @@
 
 - name: 'Ensure default agent configuration directory absent'
   ansible.windows.win_file:
-    path: 'C:\Program Files\Zabbix Agent/zabbix_agentd.conf.d'
+    path: "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.conf.d"
     state: 'absent'
 
 - name: 'Ensure agent configuration directories'
@@ -53,15 +53,15 @@
     path: "{{ conf_dir }}"
     state: 'directory'
   loop:
-    - 'C:\Program Files\Zabbix Agent/zabbix_agentd.d'
-    - 'C:\Program Files\Zabbix Agent/Scripts'
+    - "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.d"
+    - "C:\\Program Files\\Zabbix Agent\\Scripts"
   loop_control:
     loop_var: 'conf_dir'
 
 - name: 'Deploy supporting script for templates'
   ansible.windows.win_copy:
     src: "{{ zabbix_template_script_path }}/zabbix-{{ template['filename'] }}/zabbix_{{ template['filename'] }}"
-    dest: "C:\Program Files\Zabbix Agent\Scripts\zabbix_{{ template['filename'] }}"
+    dest: "C:\\Program Files\\Zabbix Agent\\Scripts\\zabbix_{{ template['filename'] }}"
   when: template['filename'] is defined
   loop: "{{ zabbix_templates }}"
   loop_control:
@@ -70,7 +70,7 @@
 - name: 'Deploy agent configuration for templates'
   ansible.windows.win_copy:
     src: "{{ zabbix_template_script_path }}/zabbix-{{ template['filename'] }}/zabbix_agent-{{ template['filename'] }}.conf"
-    dest: "C:\Program Files\Zabbix Agent\zabbix_agentd.d\zabbix_agent-{{ template['filename'] }}.conf"
+    dest: "C:\\Program Files\\Zabbix Agent\\zabbix_agentd.d\\zabbix_agent-{{ template['filename'] }}.conf"
   when: template['filename'] is defined
   loop: "{{ zabbix_templates }}"
   loop_control:
@@ -80,7 +80,7 @@
 - name: 'Deploy host agent configuration file for templates'
   ansible.windows.win_copy:
     src: "{{ zabbix_template_config_path }}/zabbix-{{ template['filename'] }}/{{ ansible_facts['fqdn'] }}.conf"
-    dest: "C:\Program Files\Zabbix Agent\zabbix-{{ template['filename'] }}.conf"
+    dest: "C:\\Program Files\\Zabbix Agent\\zabbix-{{ template['filename'] }}.conf"
   when:
     - template['conf_required'] is defined
     - template['conf_required']
@@ -94,7 +94,7 @@
 - name: 'Deploy host agent configuration files for templates'
   ansible.windows.win_copy:
     src: "{{ zabbix_template_config_path }}/zabbix-{{ template[0]['filename'] }}/{{ ansible_facts['fqdn'] }}-{{ template[1] }}"
-    dest: 'C:\Program Files\Zabbix Agent\zabbix-{{ template[1] }}'
+    dest: "C:\\Program Files\\Zabbix Agent\\zabbix-{{ template[1] }}"
   loop: "{{ zabbix_templates | subelements('conf_files', { 'skip_missing': true } ) }}"
   loop_control:
     loop_var: 'template'
@@ -104,7 +104,7 @@
   community.windows.win_scheduled_task:
     name: "{{ template['filename'] }} getdata"
     actions:
-      - path: 'C:\Program Files\Zabbix Agent\Scripts\zabbix_{{ template['filename'] }}'
+      - path: "C:\\Program Files\\Zabbix Agent\\Scripts\\zabbix_{{ template['filename'] }}"
         arguments: 'getdata'
     triggers: "{{ template['schedtask_triggers'] | default([]) }}"
     user: "{{ template['schedtask_user'] | default('SYSTEM') }}"
