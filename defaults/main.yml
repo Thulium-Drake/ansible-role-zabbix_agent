@@ -9,6 +9,22 @@ zabbix_server_validate: true                                # Validate the serve
 zabbix_server_agent_force: true                             # Overwrite any existing configuration when
                                                             # registering agents
 ###
+# Server Database settings
+###
+zabbix_server_database: 'mysql'
+zabbix_server_webserver: 'nginx'
+zabbix_server_database_host: 'localhost'
+zabbix_server_database_port: '3306'
+zabbix_server_database_name: 'zabbix'
+zabbix_server_database_user: 'zabbix'
+zabbix_server_database_password: 'zabbix'
+
+zabbix_server_database_admin_user: 'root'
+zabbix_server_database_admin_password: 'password'
+
+zabbix_server_this_host: false
+zabbix_server_configure_webserver: true
+###
 # General Agent configuration
 ###
 zabbix_server_addresses: '127.0.0.1'                  # Comma separated list of all Zabbix server addresses

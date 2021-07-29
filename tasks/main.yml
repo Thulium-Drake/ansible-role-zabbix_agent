@@ -1,4 +1,8 @@
 ---
+- name: 'Set up server'
+  include_tasks: 'install_server.yml'
+  when: zabbix_server_this_host
+
 - name: 'Install packages'
   package:
     name:
@@ -133,7 +137,7 @@
     loop_var: 'template'
 
 - name: 'Ensure host in Zabbix'
-  zabbix_host:
+  community.zabbix.zabbix_host:
     server_url: "{{ zabbix_server_url }}"
     validate_certs: "{{ zabbix_server_validate }}"
     http_login_user: "{{ zabbix_server_username }}"
