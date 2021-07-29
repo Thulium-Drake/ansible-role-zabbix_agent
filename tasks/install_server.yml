@@ -1,0 +1,78 @@
+---
+- name: 'Install server packages'
+  package:
+    name:
+      - 'zabbix-frontend-php'
+      - 'zabbix-get'
+      - 'zabbix-sql-scripts'
+      - "zabbix-server-{{ zabbix_server_database }}"
+      - "zabbix-{{ zabbix_server_webserver }}-conf"
+      - 'python3-pymysql'
+
+- name: 'Set up MySQL database'
+  block:
+    - name: 'Create MySQL database'
+      community.mysql.mysql_db:
+        name: "{{ zabbix_server_database_name }}"
+        collation: 'utf8_bin'
+        encoding: 'utf8'
+        login_user: "{{ zabbix_server_database_admin_user }}"
+        login_password: "{{ zabbix_server_database_admin_password }}"
+        check_implicit_admin: true
+        state: 'present'
+      register: zabbix_server_created_db
+
+    - name: 'Import MySQL database'
+      community.mysql.mysql_db:
+        name: "{{ zabbix_server_database_name }}"
+        collation: 'utf8_bin'
+        encoding: 'utf8'
+        login_user: "{{ zabbix_server_database_admin_user }}"
+        login_password: "{{ zabbix_server_database_admin_password }}"
+        check_implicit_admin: true
+        target: '/usr/share/doc/zabbix-sql-scripts/mysql/create.sql.gz'
+        state: 'import'
+      when: zabbix_server_created_db['changed']
+
+    - name: 'Create MySQL database user'
+      community.mysql.mysql_user:
+        name: "{{ zabbix_server_database_user }}"
+        password: "{{ zabbix_server_database_password }}"
+        priv: "{{ zabbix_server_database_name }}.*:ALL"
+        login_user: "{{ zabbix_server_database_admin_user }}"
+        login_password: "{{ zabbix_server_database_admin_password }}"
+        check_implicit_admin: true
+        state: 'present'
+  when:
+    - zabbix_server_database == 'mysql'
+    - zabbix_server_database_host == 'localhost'
+
+- name: 'Configure Zabbix server'
+  template:
+    src: 'zabbix_server.conf.j2'
+    dest: '/etc/zabbix/zabbix_server.conf'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+
+- name: 'Configure webserver'
+  copy:
+    src: "/etc/zabbix/{{ zabbix_server_webserver }}.conf"
+    dest: "{{ zabbix_webserver_path[zabbix_server_webserver] }}"
+    remote_src: true
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  when: zabbix_server_configure_webserver
+
+- name: 'Ensure services running'
+  service:
+    name: "{{ service }}"
+    enabled: true
+    state: 'started'
+  loop:
+    - 'zabbix-server'
+    - "{{ (zabbix_server_webserver == 'nginx') | ternary(zabbix_server_php_service, omit) }}"
+    - "{{ zabbix_server_webserver }}"
+  loop_control:
+    loop_var: 'service'

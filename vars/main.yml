@@ -1,0 +1,5 @@
+---
+zabbix_webserver_path:
+  nginx: '/etc/nginx/sites-enabled/default'
+
+zabbix_server_php_service: 'php7.3-fpm'

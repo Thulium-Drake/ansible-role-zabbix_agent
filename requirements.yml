@@ -1,0 +1,8 @@
+---
+collections:
+  - 'ansible.windows'
+  - 'community.zabbix'
+  - 'community.mysql'
+
+roles:
+  - 'geerlingguy.mysql'
