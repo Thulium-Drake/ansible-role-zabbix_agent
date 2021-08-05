@@ -28,6 +28,11 @@
         name: 'git'
         state: 'present'
 
+    - name: 'Install ansible_merge_vars'
+      pip:
+        name: 'ansible_merge_vars'
+        state: 'present'
+
     - name: 'Clone repo'
       git:
         repo: 'https://github.com/Thulium-Drake/zabbix-templates'

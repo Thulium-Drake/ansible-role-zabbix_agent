@@ -1,5 +1,12 @@
 ---
+zabbix_server_supported_databases:
+  - 'mysql'
+
+zabbix_server_supported_webservers:
+  - 'nginx'
+
 zabbix_webserver_path:
   nginx: '/etc/nginx/sites-enabled/default'
 
-zabbix_server_php_service: 'php7.3-fpm'
+zabbix_server_php_service:
+  nginx: 'php7.3-fpm'

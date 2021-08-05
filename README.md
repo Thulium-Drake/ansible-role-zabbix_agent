@@ -47,3 +47,10 @@ required to connect to the Windows host via WinRM or SSH):
         name: 'zabbix_agent'
         tasks_from: 'win_main.yml'
 ```
+
+## Zabbix Server setup
+This role can also be used to install the Zabbix server on a system. Please note that
+that this role does _not_ install or configure a database server for you. The author
+recommends to use geerlingguy.mysql to set up the MariaDB server.
+
+For detailed instructions, please check the defaults file.

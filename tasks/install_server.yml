@@ -1,4 +1,10 @@
 ---
+- name: 'Validate input'
+  assert:
+    that:
+      - zabbix_server_database in zabbix_server_supported_databases
+      - zabbix_server_webserver in zabbix_server_supported_webservers
+
 - name: 'Install server packages'
   package:
     name:
@@ -16,36 +22,38 @@
         name: "{{ zabbix_server_database_name }}"
         collation: 'utf8_bin'
         encoding: 'utf8'
+        login_host: "{{ zabbix_server_database_host }}"
+        login_port: "{{ zabbix_server_database_port }}"
         login_user: "{{ zabbix_server_database_admin_user }}"
         login_password: "{{ zabbix_server_database_admin_password }}"
         check_implicit_admin: true
         state: 'present'
       register: zabbix_server_created_db
 
-    - name: 'Import MySQL database'
-      community.mysql.mysql_db:
-        name: "{{ zabbix_server_database_name }}"
-        collation: 'utf8_bin'
-        encoding: 'utf8'
-        login_user: "{{ zabbix_server_database_admin_user }}"
-        login_password: "{{ zabbix_server_database_admin_password }}"
-        check_implicit_admin: true
-        target: '/usr/share/doc/zabbix-sql-scripts/mysql/create.sql.gz'
-        state: 'import'
-      when: zabbix_server_created_db['changed']
-
     - name: 'Create MySQL database user'
       community.mysql.mysql_user:
         name: "{{ zabbix_server_database_user }}"
         password: "{{ zabbix_server_database_password }}"
         priv: "{{ zabbix_server_database_name }}.*:ALL"
+        login_host: "{{ zabbix_server_database_host }}"
+        login_port: "{{ zabbix_server_database_port }}"
         login_user: "{{ zabbix_server_database_admin_user }}"
         login_password: "{{ zabbix_server_database_admin_password }}"
         check_implicit_admin: true
         state: 'present'
+
+    - name: 'Import MySQL database'
+      community.mysql.mysql_db:
+        name: "{{ zabbix_server_database_name }}"
+        login_host: "{{ zabbix_server_database_host }}"
+        login_port: "{{ zabbix_server_database_port }}"
+        login_user: "{{ zabbix_server_database_user }}"
+        login_password: "{{ zabbix_server_database_password }}"
+        target: '/usr/share/doc/zabbix-sql-scripts/mysql/create.sql.gz'
+        state: 'import'
+      when: zabbix_server_created_db['changed']
   when:
     - zabbix_server_database == 'mysql'
-    - zabbix_server_database_host == 'localhost'
 
 - name: 'Configure Zabbix server'
   template:
@@ -72,7 +80,7 @@
     state: 'started'
   loop:
     - 'zabbix-server'
-    - "{{ (zabbix_server_webserver == 'nginx') | ternary(zabbix_server_php_service, omit) }}"
+    - "{{ (zabbix_server_webserver == 'nginx') | ternary(zabbix_server_php_service[zabbix_server_webserver], omit) }}"
     - "{{ zabbix_server_webserver }}"
   loop_control:
     loop_var: 'service'

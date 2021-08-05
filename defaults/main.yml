@@ -11,19 +11,22 @@ zabbix_server_agent_force: true                             # Overwrite any exis
 ###
 # Server Database settings
 ###
-zabbix_server_database: 'mysql'
-zabbix_server_webserver: 'nginx'
-zabbix_server_database_host: 'localhost'
-zabbix_server_database_port: '3306'
-zabbix_server_database_name: 'zabbix'
-zabbix_server_database_user: 'zabbix'
-zabbix_server_database_password: 'zabbix'
+zabbix_server_database: 'mysql'                             # Which type of database to install
+zabbix_server_webserver: 'nginx'                            # Which webserver to use for the frontend
+zabbix_server_database_host: 'localhost'                    # Database server, this role will _not_ configure a
+                                                            # server. See README.md for a suggestion
+zabbix_server_database_port: '3306'                         # Port used to connect to the database server
+zabbix_server_database_name: 'zabbix'                       # Database name used by Zabbix
+zabbix_server_database_user: 'zabbix'                       # User for the database
+zabbix_server_database_password: 'zabbix'                   # Password of the user
 
-zabbix_server_database_admin_user: 'root'
-zabbix_server_database_admin_password: 'password'
+zabbix_server_database_admin_user: 'root'                   # These credentials are used to create the
+zabbix_server_database_admin_password: 'password'           # Zabbix user and database
 
-zabbix_server_this_host: false
-zabbix_server_configure_webserver: true
+zabbix_server_this_host: false                              # When set to true, the current host will be configured
+                                                            # as a Zabbix server
+zabbix_server_configure_webserver: true                     # Whether or not to configure a webserver for the frontend
+
 ###
 # General Agent configuration
 ###
