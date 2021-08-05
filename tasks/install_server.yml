@@ -8,12 +8,12 @@
 - name: 'Install server packages'
   package:
     name:
-      - 'zabbix-frontend-php'
+      - "{{ zabbix_frontend_package }}"
       - 'zabbix-get'
       - 'zabbix-sql-scripts'
       - "zabbix-server-{{ zabbix_server_database }}"
       - "zabbix-{{ zabbix_server_webserver }}-conf"
-      - 'python3-pymysql'
+      - "{{ zabbix_pymysql_package }}"
 
 - name: 'Set up MySQL database'
   block:
@@ -62,8 +62,9 @@
     owner: 'root'
     group: 'root'
     mode: 0644
+  when: ansible_facts['os_family'] == 'RedHat'
 
-- name: 'Configure webserver'
+- name: 'Configure webserver (Debian-like)'
   copy:
     src: "/etc/zabbix/{{ zabbix_server_webserver }}.conf"
     dest: "{{ zabbix_webserver_path[zabbix_server_webserver] }}"
@@ -71,7 +72,21 @@
     owner: 'root'
     group: 'root'
     mode: 0644
-  when: zabbix_server_configure_webserver
+  when:
+    - zabbix_server_configure_webserver
+    - ansible_facts['os_family'] != 'RedHat'
+
+- name: 'Configure nginx webserver (RHEL-like)'
+  blockinfile:
+    path: "{{ zabbix_webserver_path[zabbix_server_webserver] }}"
+    block: |
+      listen 80;
+      server_name {{ zabbix_server_url.rpartition("//")[-1].partition("/")[0] }};
+    insertafter: 'server {'
+  when:
+    - zabbix_server_configure_webserver
+    - zabbix_server_webserver == 'nginx'
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: 'Ensure services running'
   service:

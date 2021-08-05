@@ -1,0 +1,12 @@
+---
+zabbix_frontend_package: "zabbix-web-{{ zabbix_server_database }}"
+
+zabbix_pymysql_package: 'python3-PyMySQL'
+
+zabbix_webserver_path:
+  nginx: '/etc/nginx/conf.d/zabbix.conf'
+
+zabbix_server_php_service:
+  nginx: 'php-fpm'
+
+zabbix_cron_package: 'cronie'
