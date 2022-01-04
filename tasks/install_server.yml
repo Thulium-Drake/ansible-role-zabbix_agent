@@ -88,6 +88,14 @@
     - zabbix_server_webserver == 'nginx'
     - ansible_facts['os_family'] == 'RedHat'
 
+- name: 'Ensure SELinux Boolean'
+  ansible.posix.seboolean:
+    name: 'httpd_can_connect_zabbix'
+    state: true
+    persistent: true
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+
 - name: 'Ensure services running'
   service:
     name: "{{ service }}"
