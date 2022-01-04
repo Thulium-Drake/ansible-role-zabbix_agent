@@ -54,3 +54,11 @@ that this role does _not_ install or configure a database server for you. The au
 recommends to use geerlingguy.mysql to set up the MariaDB server.
 
 For detailed instructions, please check the defaults file.
+
+### SELinux on the Server
+This has not been fully worked out yet, but installing a Zabbix server with SELinux enabled is a
+minor challenge. So far I've made it work using the following steps:
+
+1. ```setsebool -P zabbix_can_network 1```
+2. ```setsebool -P httpd_can_connect_zabbix 1```
+3. ```cd; grep "denied.*zabbix" /var/log/audit/audit.log | audit2allow -M zabbix_policy; semodule -i zabbix_policy.pp```
