@@ -15,6 +15,14 @@
       - "zabbix-{{ zabbix_server_webserver }}-conf"
       - "{{ zabbix_pymysql_package }}"
 
+- name: 'Ensure Firewalld ports'
+  ansible.posix.firewalld:
+    service: 'zabbix-server'
+    state: 'enabled'
+    permanent: true
+    immediate: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
 - name: 'Set up MySQL database'
   block:
     - name: 'Create MySQL database'
