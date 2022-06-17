@@ -128,6 +128,13 @@
     loop_var: 'template'
   notify: 'restart zabbix-agent'
 
+- name: 'Ensure cron PATH'
+  cronvar:
+    name: 'PATH'
+    value: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    state: 'present'
+    user: 'zabbix'
+
 - name: 'Ensure cronjobs for templates'
   cron:
     name: "{{ template['filename'] }} getdata"
