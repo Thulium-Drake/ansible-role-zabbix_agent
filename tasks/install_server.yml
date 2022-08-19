@@ -1,19 +1,18 @@
 ---
 - name: 'Validate input'
-  assert:
+  ansible.builtin.assert:
     that:
       - zabbix_server_database in zabbix_server_supported_databases
       - zabbix_server_webserver in zabbix_server_supported_webservers
 
 - name: 'Install server packages'
-  package:
+  ansible.builtin.package:
     name:
       - "{{ zabbix_frontend_package }}"
       - 'zabbix-get'
       - 'zabbix-sql-scripts'
       - "zabbix-server-{{ zabbix_server_database }}"
       - "zabbix-{{ zabbix_server_webserver }}-conf"
-      - "{{ zabbix_pymysql_package }}"
 
 - name: 'Ensure Firewalld ports'
   ansible.posix.firewalld:
@@ -23,8 +22,38 @@
     immediate: true
   when: ansible_facts['os_family'] == 'RedHat'
 
-- name: 'Set up MySQL database'
+- name: 'Set up PostgreSQL database'
+  when:
+    - zabbix_server_database == 'pgsql'
+    - zabbix_server_setup_database
   block:
+    - name: 'Create PostgreSQL database'
+      community.postgresql.postgresql_db:
+        name: "{{ zabbix_server_database_name }}"
+        encoding: 'Unicode'
+        template: 'template0'
+        owner: "{{ zabbix_server_database_user }}"
+        state: 'present'
+      register: 'zabbix_server_created_db'
+
+    - name: 'Import PostgreSQL database'
+      community.postgresql.postgresql_db:
+        name: "{{ zabbix_server_database_name }}"
+        state: 'restore'
+        target: '/usr/share/doc/zabbix-sql-scripts/postgresql/server.sql.gz'
+      when: zabbix_server_created_db['changed']
+
+- name: 'Set up MySQL database'
+  when:
+    - zabbix_server_database == 'mysql'
+    - zabbix_server_setup_database
+  block:
+    - name: 'Ensure extra dependencies'
+      ansible.builtin.package:
+        name:
+          - "{{ zabbix_pymysql_package }}"
+        state: 'present'
+
     - name: 'Create MySQL database'
       community.mysql.mysql_db:
         name: "{{ zabbix_server_database_name }}"
@@ -60,11 +89,9 @@
         target: '/usr/share/doc/zabbix-sql-scripts/mysql/create.sql.gz'
         state: 'import'
       when: zabbix_server_created_db['changed']
-  when:
-    - zabbix_server_database == 'mysql'
 
 - name: 'Configure Zabbix server'
-  template:
+  ansible.builtin.template:
     src: 'zabbix_server.conf.j2'
     dest: '/etc/zabbix/zabbix_server.conf'
     owner: 'root'
@@ -73,7 +100,7 @@
   when: ansible_facts['os_family'] == 'RedHat'
 
 - name: 'Configure webserver (Debian-like)'
-  copy:
+  ansible.builtin.copy:
     src: "/etc/zabbix/{{ zabbix_server_webserver }}.conf"
     dest: "{{ zabbix_webserver_path[zabbix_server_webserver] }}"
     remote_src: true
@@ -85,7 +112,7 @@
     - ansible_facts['os_family'] != 'RedHat'
 
 - name: 'Configure nginx webserver (RHEL-like)'
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ zabbix_webserver_path[zabbix_server_webserver] }}"
     block: |
       listen 80;
@@ -105,7 +132,7 @@
     - ansible_facts['os_family'] == 'RedHat'
 
 - name: 'Ensure services running'
-  service:
+  ansible.builtin.service:
     name: "{{ service }}"
     enabled: true
     state: 'started'

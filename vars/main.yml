@@ -1,6 +1,8 @@
 ---
 zabbix_server_supported_databases:
   - 'mysql'
+  - 'pgsql'
 
 zabbix_server_supported_webservers:
   - 'nginx'
+  - 'apache'

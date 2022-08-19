@@ -2,30 +2,31 @@
 ###
 # General server configuration
 ###
-zabbix_server_username: 'zabbix-cli'                        # Username for Ansible to use on the Zabbix server
-zabbix_server_password: 'supersecretpassword'               # Password for the user
-zabbix_server_url: 'https://monitoring.example.com'         # URL where the Zabbix server is
-zabbix_server_validate: true                                # Validate the server's SSL certificate
-zabbix_server_agent_force: true                             # Overwrite any existing configuration when
-                                                            # registering agents
+zabbix_server_username: 'zabbix-cli'                 # Username for Ansible to use on the Zabbix server
+zabbix_server_password: 'supersecretpassword'        # Password for the user
+zabbix_server_url: 'https://monitoring.example.com'  # URL where the Zabbix server is
+zabbix_server_validate: true                         # Validate the server's SSL certificate
+zabbix_server_agent_force: true                      # Overwrite any existing configuration when
+                                                     # registering agents
 ###
 # Server Database settings
 ###
-zabbix_server_database: 'mysql'                             # Which type of database to install
-zabbix_server_webserver: 'nginx'                            # Which webserver to use for the frontend
-zabbix_server_database_host: 'localhost'                    # Database server, this role will _not_ configure a
-                                                            # server. See README.md for a suggestion
-zabbix_server_database_port: '3306'                         # Port used to connect to the database server
-zabbix_server_database_name: 'zabbix'                       # Database name used by Zabbix
-zabbix_server_database_user: 'zabbix'                       # User for the database
-zabbix_server_database_password: 'zabbix'                   # Password of the user
+zabbix_server_database: 'mysql'                      # Which type of database to install
+zabbix_server_webserver: 'nginx'                     # Which webserver to use for the frontend
+zabbix_server_database_host: 'localhost'             # Database server, this role will _not_ configure a
+                                                     # server. See README.md for a suggestion
+zabbix_server_database_port: '3306'                  # Port used to connect to the database server
+zabbix_server_database_name: 'zabbix'                # Database name used by Zabbix
+zabbix_server_database_user: 'zabbix'                # User for the database
+zabbix_server_database_password: 'zabbix'            # Password of the user
 
-zabbix_server_database_admin_user: 'root'                   # These credentials are used to create the
-zabbix_server_database_admin_password: 'password'           # Zabbix user and database
+zabbix_server_database_admin_user: 'root'            # These credentials are used to create the
+zabbix_server_database_admin_password: 'password'    # Zabbix user and database
 
-zabbix_server_this_host: false                              # When set to true, the current host will be configured
-                                                            # as a Zabbix server
-zabbix_server_configure_webserver: true                     # Whether or not to configure a webserver for the frontend
+zabbix_server_this_host: false                       # When set to true, the current host will be configured
+                                                     # as a Zabbix server
+zabbix_server_configure_webserver: true              # Whether or not to configure a webserver for the frontend
+zabbix_server_configure_dbserver: true               # Whether or not to configure a database (not server!)
 
 ###
 # General Agent configuration
@@ -51,7 +52,7 @@ zabbix_template_config_path: '/opt/zabbix/configs'    # Path where template conf
                                                       # following manner: template_name/host_fqdn.conf
 zabbix_agent_description: |
   Some settings managed by Ansible, changed to these can be lost!
-  
+
   Changes to macro's are kept.
 
 ###
@@ -66,28 +67,28 @@ zabbix_agent_description: |
 #
 # The list is created using ansible-merge-vars
 #
-#zabbix_templates:                                     # List of templates to be deployed on a specific host
-#  - zabbix_name: 'Template OS Linux'                  # Template name in Zabbix
-#  - filename: 'diskstats'                             # Name of the template on disk
-#    conf_required: false                              # If there is a host-specific config to be deployed
-#    cron_required: true                               # If there is a cronjob required to gather data
-#  - filename: 'urlcheck'
-#    zabbix_name: 'Template URL monitoring'
-#    conf_required: true
-#    cron_required: true                               # If the template uses a script to gather data
-#    cron_special_time: 'hourly'                       # supports special_time, minute, hour, day, weekday, month
-#    cron_user: 'zabbix'                               # Which user runs the cronjob, if not zabbix
-#  - filename: 'pve'
-#    zabbix_name: 'Template OS PVE'
-#    conf_required: true
-#    conf_files:
-#      - 'pve.conf'
-#      - 'ctpid.conf'
-#    cron_required: true
-#    packages:                                         # List of packages that have be present for the template
-#      - 'gawk'                                        # to function properly
-#      - 'jo'
-#      - 'jq'
+# zabbix_templates:                                     # List of templates to be deployed on a specific host
+#   - zabbix_name: 'Template OS Linux'                  # Template name in Zabbix
+#   - filename: 'diskstats'                             # Name of the template on disk
+#     conf_required: false                              # If there is a host-specific config to be deployed
+#     cron_required: true                               # If there is a cronjob required to gather data
+#   - filename: 'urlcheck'
+#     zabbix_name: 'Template URL monitoring'
+#     conf_required: true
+#     cron_required: true                               # If the template uses a script to gather data
+#     cron_special_time: 'hourly'                       # supports special_time, minute, hour, day, weekday, month
+#     cron_user: 'zabbix'                               # Which user runs the cronjob, if not zabbix
+#   - filename: 'pve'
+#     zabbix_name: 'Template OS PVE'
+#     conf_required: true
+#     conf_files:
+#       - 'pve.conf'
+#       - 'ctpid.conf'
+#     cron_required: true
+#     packages:                                         # List of packages that have be present for the template
+#       - 'gawk'                                        # to function properly
+#       - 'jo'
+#       - 'jq'
 #
 # Windows based templates Scheduled tasks use community.windows.win_scheduled_task's triggers
 #

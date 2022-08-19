@@ -51,7 +51,8 @@ required to connect to the Windows host via WinRM or SSH):
 ## Zabbix Server setup
 This role can also be used to install the Zabbix server on a system. Please note that
 that this role does _not_ install or configure a database server for you. The author
-recommends to use geerlingguy.mysql to set up the MariaDB server.
+recommends to use geerlingguy.mysql to set up the MariaDB server. Or geerlingguy.postgresql
+if you prefer PostgreSQL.
 
 For detailed instructions, please check the defaults file.
 
