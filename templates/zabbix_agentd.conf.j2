@@ -11,8 +11,8 @@ Include=/etc/zabbix/zabbix_agentd.d/*.conf
 TLSPSKFile=/etc/zabbix/zabbix_agentd.key
 {% endif %}
 LogFileSize=0
-Server={{ zabbix_server_addresses }}
-ServerActive={{ zabbix_server_addresses }}
+Server={{ zabbix_server_addresses | join(',') }}
+ServerActive={{ zabbix_server_addresses | join(',') }}
 Hostname={{ ansible_facts['fqdn'] }}
 TLSConnect=psk
 TLSAccept=psk
