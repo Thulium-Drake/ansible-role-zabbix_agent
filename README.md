@@ -1,6 +1,7 @@
-[![Build Status](https://drone.element-networks.nl/api/badges/Element-Networks/ansible-role_zabbix-agent/status.svg)](https://drone.element-networks.nl/Element-Networks/ansible-role_zabbix-agent)
+# This role has been deprecated in favor of the community.zabbix collection
+Please find more information [here](https://github.com/ansible-collections/community.zabbix/)
 
-# Zabbix agent as configured by Ansible
+## Zabbix agent as configured by Ansible
 This role can configure an Zabbix agent on your Ansible managed hosts.
 
 It will install an agent and configure it for use with a Zabbix server using
@@ -14,7 +15,7 @@ the ones in https://github.com/Thulium-Drake/zabbix-templates.
 If you have your own collection of Zabbix templates, you can still use this role if
 you place your template scripts and configs in a similar structure.
 
-## Setup
+### Setup
 Plugin requirements:
   * Ansible Merge Vars: https://github.com/leapfrogonline/ansible-merge-vars
 Collection requirements:
@@ -25,7 +26,7 @@ Windows collection requirements:
   * community.windows
 Incorporate the role in your regular Ansible playbooks and configure it.
 
-## Windows Setup
+### Windows Setup
 When installing Zabbix on Windows targets, please note that this role assumes the msi package is
 present on the Ansible Controller. Please set the variable for which version you wish to install
 (default is 5.0.4). Then place the MSI package at:
@@ -48,7 +49,7 @@ required to connect to the Windows host via WinRM or SSH):
         tasks_from: 'win_main.yml'
 ```
 
-## Zabbix Server setup
+### Zabbix Server setup
 This role can also be used to install the Zabbix server on a system. Please note that
 that this role does _not_ install or configure a database server for you. The author
 recommends to use geerlingguy.mysql to set up the MariaDB server. Or geerlingguy.postgresql
@@ -56,7 +57,7 @@ if you prefer PostgreSQL.
 
 For detailed instructions, please check the defaults file.
 
-### SELinux on the Server
+#### SELinux on the Server
 This has not been fully worked out yet, but installing a Zabbix server with SELinux enabled is a
 minor challenge. So far I've made it work using the following steps:
 
